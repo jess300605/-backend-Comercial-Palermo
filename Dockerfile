@@ -32,10 +32,10 @@ RUN chmod -R 775 storage bootstrap/cache
 # Exponer puerto
 EXPOSE 8080
 
-# Todo se ejecuta en runtime cuando las variables de entorno están disponibles
-CMD composer dump-autoload --optimize && \
-    cp -n .env.example .env 2>/dev/null || true && \
+# Orden correcto: primero configurar Laravel, LUEGO generar autoload
+CMD cp -n .env.example .env 2>/dev/null || true && \
     php artisan key:generate --force && \
+    composer dump-autoload --optimize --no-scripts && \
     php artisan config:cache && \
     php artisan route:cache && \
     php artisan migrate --force && \
