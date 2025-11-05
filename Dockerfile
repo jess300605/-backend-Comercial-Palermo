@@ -23,8 +23,8 @@ WORKDIR /app
 # Copiar archivos
 COPY . .
 
-# Instalar dependencias SIN ejecutar ningún script
-RUN composer install --no-dev --no-scripts --no-autoloader
+# Instalar dependencias SIN ejecutar scripts (pero SÍ generar autoload)
+RUN composer install --no-dev --no-scripts
 
 # Dar permisos
 RUN chmod -R 775 storage bootstrap/cache
@@ -32,10 +32,9 @@ RUN chmod -R 775 storage bootstrap/cache
 # Exponer puerto
 EXPOSE 8080
 
-# Orden correcto: primero configurar Laravel, LUEGO generar autoload
+# Configurar Laravel y arrancar
 CMD cp -n .env.example .env 2>/dev/null || true && \
     php artisan key:generate --force && \
-    composer dump-autoload --optimize --no-scripts && \
     php artisan config:cache && \
     php artisan route:cache && \
     php artisan migrate --force && \
