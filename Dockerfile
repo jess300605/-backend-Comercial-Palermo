@@ -23,7 +23,7 @@ WORKDIR /app
 # Copiar archivos
 COPY . .
 
-# Instalar dependencias SIN ejecutar scripts (pero SÍ generar autoload)
+# Instalar dependencias SIN ejecutar scripts
 RUN composer install --no-dev --no-scripts
 
 # Dar permisos
@@ -32,10 +32,20 @@ RUN chmod -R 775 storage bootstrap/cache
 # Exponer puerto
 EXPOSE 8080
 
-# Configurar Laravel y arrancar
-CMD cp -n .env.example .env 2>/dev/null || true && \
+# Script de inicio con logs detallados
+CMD set -e && \
+    echo "[Railway] Iniciando configuración de Laravel..." && \
+    echo "[Railway] Verificando archivos..." && \
+    ls -la && \
+    echo "[Railway] Creando .env desde .env.example..." && \
+    cp .env.example .env && \
+    echo "[Railway] Generando APP_KEY..." && \
     php artisan key:generate --force && \
+    echo "[Railway] Cacheando configuración..." && \
     php artisan config:cache && \
+    echo "[Railway] Cacheando rutas..." && \
     php artisan route:cache && \
+    echo "[Railway] Ejecutando migraciones..." && \
     php artisan migrate --force && \
+    echo "[Railway] Iniciando servidor en puerto 8080..." && \
     php artisan serve --host=0.0.0.0 --port=8080
