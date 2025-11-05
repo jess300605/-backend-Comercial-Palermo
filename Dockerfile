@@ -25,8 +25,17 @@ WORKDIR /app
 # Copiar archivos
 COPY . .
 
-# Instalar dependencias de PHP
-RUN composer install --no-dev --optimize-autoloader
+# Crear .env desde .env.example si no existe
+RUN cp .env.example .env || true
+
+# Instalar dependencias sin ejecutar scripts
+RUN composer install --no-dev --optimize-autoloader --no-scripts
+
+# Generar APP_KEY
+RUN php artisan key:generate
+
+# Ahora ejecutar los scripts de composer
+RUN composer dump-autoload --optimize
 
 # Dar permisos
 RUN chmod -R 775 storage bootstrap/cache
