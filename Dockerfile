@@ -1,5 +1,6 @@
 FROM php:8.2-cli
 
+  
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
     git \
