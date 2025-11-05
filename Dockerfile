@@ -1,6 +1,5 @@
 FROM php:8.2-cli
 
-  
 # Instalar dependencias del sistema
 RUN apt-get update && apt-get install -y \
     git \
@@ -24,11 +23,8 @@ WORKDIR /app
 # Copiar archivos
 COPY . .
 
-# Instalar dependencias sin ejecutar scripts
-RUN composer install --no-dev --optimize-autoloader --no-scripts
-
-# Ejecutar autoload
-RUN composer dump-autoload --optimize
+# Instalar dependencias SIN ejecutar ningún script
+RUN composer install --no-dev --no-scripts --no-autoloader
 
 # Dar permisos
 RUN chmod -R 775 storage bootstrap/cache
@@ -36,8 +32,9 @@ RUN chmod -R 775 storage bootstrap/cache
 # Exponer puerto
 EXPOSE 8080
 
-# Script de inicio que configura Laravel antes de arrancar
-CMD cp -n .env.example .env 2>/dev/null || true && \
+# Todo se ejecuta en runtime cuando las variables de entorno están disponibles
+CMD composer dump-autoload --optimize && \
+    cp -n .env.example .env 2>/dev/null || true && \
     php artisan key:generate --force && \
     php artisan config:cache && \
     php artisan route:cache && \
